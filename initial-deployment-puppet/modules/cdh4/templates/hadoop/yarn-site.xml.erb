@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<!-- NOTE:  This file is managed by Puppet. -->
+
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+
+  <property>
+    <name>yarn.resourcemanager.scheduler.address</name>
+    <value><%= @primary_namenode_host %>:8030</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.resource-tracker.address</name>
+    <value><%= @primary_namenode_host %>:8031</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.address</name>
+    <value><%= @primary_namenode_host %>:8032</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.admin.address</name>
+    <value><%= @primary_namenode_host %>:8033</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.webapp.address</name>
+    <value>0.0.0.0:8088</value>
+  </property>
+
+<% if @yarn_resourcemanager_scheduler_class -%>
+  <property>
+    <name>yarn.resourcemanager.scheduler.class</name>
+    <value><%= yarn_resourcemanager_scheduler_class %></value>
+  </property>
+<% end -%>
+
+  <property>
+    <name>yarn.nodemanager.localizer.address</name>
+    <value>0.0.0.0:8040</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.address</name>
+    <value>0.0.0.0:8041</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.webapp.address</name>
+    <value>0.0.0.0:8042</value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce.shuffle</value>
+  </property>
+
+  <property>
+    <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
+    <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+  </property>
+
+
+<% if @datanode_mounts -%>
+  <property>
+    <description>List of directories to store localized files in.</description>
+    <name>yarn.nodemanager.local-dirs</name>
+    <value><%= datanode_mounts.collect { |mount| mount + "/" + yarn_local_path }.join(',') %></value>
+  </property>
+
+  <property>
+    <description>Where to store container logs.</description>
+    <name>yarn.nodemanager.log-dirs</name>
+    <value><%= datanode_mounts.collect { |mount| mount + "/" + yarn_logs_path}.join(',') %></value>
+  </property>
+<% end -%>
+
+<% if @yarn_nodemanager_resource_memory_mb -%>
+  <property>
+    <name>yarn.nodemanager.resource.memory-mb</name>
+    <value><%= yarn_nodemanager_resource_memory_mb %></value>
+  </property>
+<% end -%>
+
+  <property>
+    <name>yarn.log-aggregation-enable</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <description>Where to aggregate logs to.</description>
+    <name>yarn.nodemanager.remote-app-log-dir</name>
+    <value>/var/log/hadoop-yarn/apps</value>
+  </property>
+
+  
+  <property>
+      <name>yarn.app.mapreduce.am.staging-dir</name>
+      <value>/user</value>
+  </property>
+
+  <property>
+    <name>yarn.resourcemanager.nodes.exclude-path</name>
+    <value><%= config_directory %>/hosts.exclude</value>
+    <description>
+      A file that contains a list of NodeManagers to exclude.
+      This is useful for decommissioning nodes.
+    </description>
+  </property>
+
+  <property>
+    <description>Classpath for typical applications.</description>
+     <name>yarn.application.classpath</name>
+     <value>
+        $HADOOP_CONF_DIR,
+        $HADOOP_COMMON_HOME/*,$HADOOP_COMMON_HOME/lib/*,
+        $HADOOP_HDFS_HOME/*,$HADOOP_HDFS_HOME/lib/*,
+        $HADOOP_MAPRED_HOME/*,$HADOOP_MAPRED_HOME/lib/*,
+        $YARN_HOME/*,$YARN_HOME/lib/*
+     </value>
+  </property>
+</configuration>

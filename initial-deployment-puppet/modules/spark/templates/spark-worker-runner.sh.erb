@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Function borrowed from the original Spark source.
+spark_rotate_log ()
+{
+    log=/var/log/spark/worker.log;
+    num=5;
+    if [ -n "$2" ]; then                                                                  
+        num=$2                                                                            
+    fi
+    if [ -f "$log" ]; then # rotate logs
+        while [ $num -gt 1 ]; do                                                          
+            prev=`expr $num - 1`
+            [ -f "$log.$prev" ] && mv "$log.$prev" "$log.$num"                            
+            num=$prev                                                                     
+        done                                                                              
+        mv "$log" "$log.$num";                                                            
+    fi                                                                                    
+}
+
+spark_rotate_log
+
+export SPARK_LIBRARY_PATH="/usr/lib/hadoop/lib/native:$SPARK_LIBRARY_PATH"
+
+<%= @install_dir %>/bin/spark-class org.apache.spark.deploy.worker.Worker spark://<%= @master %>:<%= @master_port %> --work-dir <%= @scratch_dir %><% if @cores -%> --cores <%= @cores %><% end -%><% if @memory -%> --memory <%= @memory %><% end -%> >> /var/log/spark/worker.log 2>&1 < /dev/null

@@ -1,0 +1,6 @@
+*.pyc
+config.yaml
+project
+target
+adobe_hadoop.pp
+spark-worker.pp

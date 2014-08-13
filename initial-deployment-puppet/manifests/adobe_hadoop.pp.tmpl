@@ -1,0 +1,9 @@
+class adobe::hadoop_base {
+  class { 'cdh4::hadoop':
+    namenode_hosts     => ['namenode_server'],
+    datanode_mounts    => [
+      '/raid/hadoop/data'
+    ],
+    dfs_name_dir => '/raid/hadoop/name'
+  }
+}

@@ -1,0 +1,1 @@
+include cdh4::sqoop

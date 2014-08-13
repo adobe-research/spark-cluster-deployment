@@ -1,0 +1,18 @@
+# Note: This file is managed by Puppet.
+
+<% if use_yarn == true -%>
+# Use YARN for all hadoop commands
+export HADOOP_MAPRED_HOME=/usr/lib/hadoop-mapreduce
+<% else -%>
+export HADOOP_MAPRED_HOME=/usr/lib/hadoop-0.20-mapreduce
+<% end -%>
+
+<% if @namenode_jmxremote_port -%>
+# Enable NameNode JMX connections on port <%= namenode_jmxremote_port %>
+HADOOP_NAMENODE_OPTS="-Dcom.sun.management.jmxremote.port=<%= namenode_jmxremote_port %> -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
+<% end -%>
+
+<% if @datanode_jmxremote_port -%>
+# Enable DateNode JMX connections on port <%= datanode_jmxremote_port %>
+HADOOP_DATANODE_OPTS="-Dcom.sun.management.jmxremote.port=<%= datanode_jmxremote_port %> -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
+<% end -%>

@@ -1,0 +1,11 @@
+master:
+  - server0
+all: &all
+  - server0
+  - server1
+  - server2
+  - server3
+  - server4
+  - server5
+workers:
+  *all

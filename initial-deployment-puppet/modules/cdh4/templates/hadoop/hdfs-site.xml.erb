@@ -1,0 +1,106 @@
+<%
+# Convert a namenode hostname to a NameNode ID.
+# We can't use '.' characters because NameNode IDs.
+# will be used in the names of some Java properties, 
+# which are '.' delimited.
+def namenode_host_to_id(host)
+  host.tr('.', '-')
+end
+
+-%>
+<?xml version="1.0"?>
+<!-- NOTE:  This file is managed by Puppet. -->
+
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+  <property>
+   <name>dfs.permissions.superusergroup</name>
+   <value>hadoop</value>
+  </property>
+  <property>
+    <name>dfs.permissions</name>
+    <value>false</value>
+  </property>
+
+<% if @ha_enabled -%>
+  <property>
+    <name>dfs.nameservices</name>
+    <value><%= @nameservice_id %></value>
+  </property>
+
+  <property>
+    <name>dfs.ha.namenodes.<%= @nameservice_id %></name>
+    <value><%= @namenode_hosts.sort.collect { |host| namenode_host_to_id(host) }.join(',') %></value>
+  </property>
+
+<% @namenode_hosts.sort.each do |host| -%>
+  <property>
+    <name>dfs.namenode.rpc-address.<%= @nameservice_id %>.<%= namenode_host_to_id(host) %></name>
+    <value><%= host %>:8020</value>
+  </property>
+<% end # @namenode_hosts.each -%>
+
+<% @namenode_hosts.sort.each do |host| -%>
+  <property>
+    <name>dfs.namenode.http-address.<%= @nameservice_id %>.<%= namenode_host_to_id(host) %></name>
+    <value><%= host %>:50070</value>
+  </property>
+<% end # @namenode_hosts.each -%>
+
+  <property>
+    <name>dfs.namenode.shared.edits.dir</name>
+    <value>qjournal://<%= @journalnode_hosts.sort.join(':8485;') %>:8485/<%= @nameservice_id %></value>
+  </property>
+
+  <property>
+    <name>dfs.journalnode.edits.dir</name>
+    <value><%= @dfs_journalnode_edits_dir %></value>
+  </property>
+
+  <property>
+    <name>dfs.client.failover.proxy.provider.<%= @nameservice_id %></name>
+    <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+  </property>
+
+  <!-- Quorum-based JournalNode HA does not require fencing. -->
+  <property>
+    <name>dfs.ha.fencing.methods</name>
+    <value>shell(/bin/true)</value>
+  </property>
+
+<% end # if @ha_enabled -%>
+  <property>
+   <name>dfs.namenode.name.dir</name>
+   <value>file://<%= (dfs_name_dir.class == Array) ? dfs_name_dir.join(',file://') : dfs_name_dir %></value>
+  </property>
+
+<% if @datanode_mounts -%>
+  <property>
+   <name>dfs.datanode.data.dir</name>
+   <value>file://<%= datanode_mounts.sort.collect { |mount| mount + "/" + dfs_data_path }.join(',file://') %></value>
+  </property>
+<% end -%>
+
+  <property>
+   <name>dfs.block.size</name>
+   <value><%= dfs_block_size %></value>
+  </property>
+
+  <property>
+    <name>dfs.webhdfs.enabled</name>
+    <value><%= enable_webhdfs %></value>
+  </property>
+  
+  <property>
+    <name>dfs.hosts.exclude</name>
+    <value><%= config_directory %>/hosts.exclude</value>
+    <description>
+      A file that contains a list of DataNodes to exclude.
+      This is useful for decommissioning nodes.
+    </description>
+  </property>
+
+</configuration>

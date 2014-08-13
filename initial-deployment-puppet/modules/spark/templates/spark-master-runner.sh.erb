@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Function borrowed from the original Spark source.
+spark_rotate_log ()
+{
+    log=/var/log/spark/master.log;
+    num=5;
+    if [ -n "$2" ]; then                                                                  
+        num=$2                                                                            
+    fi
+    if [ -f "$log" ]; then # rotate logs
+        while [ $num -gt 1 ]; do                                                          
+            prev=`expr $num - 1`
+            [ -f "$log.$prev" ] && mv "$log.$prev" "$log.$num"                            
+            num=$prev                                                                     
+        done                                                                              
+        mv "$log" "$log.$num";                                                            
+    fi                                                                                    
+}
+
+spark_rotate_log
+<%= @install_dir %>/bin/spark-class org.apache.spark.deploy.master.Master --ip <%= @fqdn %> --webui-port <%= @web_port %> --port <%= @master_port %> >> /var/log/spark/master.log 2>&1 < /dev/null

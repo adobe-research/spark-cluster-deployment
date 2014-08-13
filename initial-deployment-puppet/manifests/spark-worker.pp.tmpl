@@ -1,0 +1,7 @@
+node default {
+  class { 'spark::worker':
+    master => 'namenode_server',
+    memory => '22g',
+    scratch_dir => "/raid/spark-work"
+  }
+}

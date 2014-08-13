@@ -1,0 +1,6 @@
+stderr.txt
+stdout.txt
+target
+project/{project,target}
+*.pickle
+*.log
