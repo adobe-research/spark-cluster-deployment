@@ -20,7 +20,6 @@
 ###########################################################################
 
 from fabric.api import *
-from fabric.contrib.project import rsync_project
 from textwrap import dedent, wrap
 import io
 import re
@@ -49,10 +48,15 @@ def assembly():
   local("sbt assembly &> assembly.log")
 
 @task
-@roles('all')
-@parallel
 def sync():
-  put(config['local_jar_dir'] + '/' + config['jar'], config['remote_jar_dir'])
+  # put(config['local_jar_dir'] + '/' + config['jar'], config['remote_jar_dir'])
+  for server in config['all']:
+    local("rsync -azrv --progress {}/{} {}:/{}".format(
+      config['local_jar_dir'],
+      config['jar'],
+      server,
+      config['remote_jar_dir']
+    ))
 
 @task
 @roles('master')
